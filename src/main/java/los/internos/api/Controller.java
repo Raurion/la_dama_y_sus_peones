@@ -70,7 +70,7 @@ public class Controller {
                     .header("Content-Type", "application/x-www-form-urlencoded")
                     .field("side", this.color)
                     .field("againstComputer", "false")
-                    .field("observers", "false")
+                    .field("observers", "true")
                     .asJson();
 
             if (responseUuid != null) {
@@ -309,6 +309,27 @@ public class Controller {
                     .asString();
 
         } catch (Exception e) {
+        }
+    }
+
+    public boolean checkTurn(){
+        try {
+            //check mate
+            HttpResponse<String> responseCheckMate = Unirest.get("http://localhost:8080/api/v1/game/check-mate?uuid=" + uuid
+            + "&side=WHITE")
+                    .header("Authorization", "Bearer "+token)
+                    .asString();
+            //check turn
+            HttpResponse<String> responseCheckTurn = Unirest.get("http://localhost:8080/api/v1/game/player-turn?uuid=" + uuid)
+                    .header("Authorization", "Bearer "+token)
+                    .asString();
+            if (responseCheckTurn.getBody().equals("true") && responseCheckMate.getBody().equals("false")) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (UnirestException ex) {
+            throw new RuntimeException(ex);
         }
     }
 
