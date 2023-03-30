@@ -29,6 +29,7 @@ public class Controller {
     private String from;
     private String to;
     private String color;
+    private int random;
 
     public Controller() {
         board = new HashMap<>();
@@ -141,6 +142,7 @@ public class Controller {
     }
 
     public void setWhites() {
+        whites.clear();
         this.board.forEach((pieza, raza) -> {
             if (raza == 1) {
                 whites.add(pieza);
@@ -150,6 +152,7 @@ public class Controller {
     }
 
     public void setBlacks() {
+        blacks.clear();
         this.board.forEach((pieza, raza) -> {
             if (raza == 0) {
                 blacks.add(pieza);
@@ -188,6 +191,7 @@ public class Controller {
 
     public void setFreeWhites() {
         try {
+            freeWhites.clear();
             for (int i = 0; i < whites.size(); i++) {
                 HttpResponse<String> responseGetAvailableMoves = Unirest.get("http://localhost:8080/api/v1/game/available-moves?from=" + whites.get(i) + "&uuid=" + this.uuid)
                         .header("Authorization", "Bearer " + this.token)
@@ -204,6 +208,7 @@ public class Controller {
 
     public void setFreeBlacks() {
         try {
+            freeBlacks.clear();
             for (int i = 0; i < blacks.size(); i++) {
                 HttpResponse<String> responseGetAvailableMoves = Unirest.get("http://localhost:8080/api/v1/game/available-moves?from=" + blacks.get(i) + "&uuid=" + this.uuid)
                         .header("Authorization", "Bearer " + this.token)
@@ -230,10 +235,10 @@ public class Controller {
 
     public void setRandomToFromFrom() {
         try {
+            System.out.println(freeWhites);
             HttpResponse<String> responseGetAvailableMoves = Unirest.get("http://localhost:8080/api/v1/game/available-moves?from=" + from + "&uuid=" + this.uuid)
                     .header("Authorization", "Bearer " + this.token)
                     .asString();
-            String resultado = responseGetAvailableMoves.getBody();
             String responseBody = responseGetAvailableMoves.getBody();
             JSONArray jsonArray = new JSONArray(responseBody);
             String[] array = new String[jsonArray.length()];
@@ -243,7 +248,12 @@ public class Controller {
                 String col = jsonObject.getString("col");
                 array[i] = col.toUpperCase() + row;
             }
-            int random = (int) (Math.random() * (array.length - 0));
+            // int random = (int) (Math.random() * ((array.length-1) - 0));
+            if(array.length >= 1) {
+                random = (int) (Math.random() * (array.length - 1));
+            } else {
+                random = 0;
+            }
             to = array[random];
 
         } catch (UnirestException ex) {
@@ -323,6 +333,8 @@ public class Controller {
             HttpResponse<String> responseCheckTurn = Unirest.get("http://localhost:8080/api/v1/game/player-turn?uuid=" + uuid)
                     .header("Authorization", "Bearer "+token)
                     .asString();
+            //System.out.println(responseCheckMate);
+            //System.out.println(responseCheckTurn);
             if (responseCheckTurn.getBody().equals("true") && responseCheckMate.getBody().equals("false")) {
                 return true;
             } else {
