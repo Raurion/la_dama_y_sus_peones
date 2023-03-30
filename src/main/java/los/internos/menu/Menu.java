@@ -26,18 +26,19 @@ public class Menu{
         System.out.println("                                                                            \\$$$$$$");
     }
 
-    public void showMenu(String token, String uuid){
-
+    public void showMenu(){
         Scanner sc = new Scanner(System.in);
-        int opcion=0;
+        int opcion;
+        int color;
 
+        controller.setToken();
         banner();
         do{
-            if(token == null) {
+            if(controller.getToken() == null) {
                 System.out.println("**** TOKEN IS NULL ****");
             }else{
                 System.out.println("***** TOKEN GENERADO: *****");
-                System.out.println(token);
+                System.out.println(controller.getToken());
                 System.out.println("***************************************");
                 System.out.println("     INTRODUCE UNA OPCIÓN: (1 o 2)");
                 System.out.println("1- Create game.");
@@ -47,21 +48,57 @@ public class Menu{
                 opcion = sc.nextInt();
                 switch (opcion){
                     case 1:
-                        if(uuid != null) {
-                            System.out.println("***** GAME CREATED *****");
-                            System.out.println(uuid);
+                        System.out.println("*** ELIGE UN COLOR: BLANCO (1) || NEGRO (0) ***");
+                        color = sc.nextInt();
+                        //CASE WHITE
+                        if(color == 1){
+                            controller.setColorWhite();
+                            controller.setUuid();
+                            if(checkGameCreated()){
+                                System.out.println("PRESS ENTER TO START");
+                                sc.next();
+                                playGame(color);
+                            }else{
 
-                        }else{
-                            System.err.println("COULD NOT CREATE GAME");
+                                break;
+                            }
+
                         }
                         break;
                 }
+
+
             }
             for (int i = 0; i < 10; i++) {
                 System.out.println();
 
             }
-
         }while(true);
+    }
+
+    public boolean checkGameCreated(){
+        if(controller.getUuid() != null) {
+            System.out.println("***** GAME CREATED *****");
+            System.out.println(controller.getUuid());
+            return true;
+        }else{
+            System.err.println("COULD NOT CREATE GAME");
+            return false;
+        }
+    }
+
+    public void playGame(int color){
+        controller.setBoard();
+        if(color == 1){
+            controller.setWhites();
+            controller.setFreeWhites();
+            controller.setRandomFreeWhite();
+        }else{
+            controller.setBlacks();
+            controller.setFreeBlacks();
+            controller.setRandomFreeBlack();
+        }
+        controller.setRandomToFromFrom();
+        controller.move();
     }
 }
