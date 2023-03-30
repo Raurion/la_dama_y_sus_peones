@@ -110,7 +110,7 @@ public class Controller {
         return false;
     }*/
 
-    public String getAvailableMoves() {
+    public void getAvailableMoves() {
         try {
             ArrayList<String> whitesCanMove = new ArrayList<>();
             for (int i = 0; i < whites.size(); i++) {
@@ -152,7 +152,6 @@ public class Controller {
 
             to = array[random];
 
-            return whitesCanMove.toString();
         } catch (UnirestException ex) {
             throw new RuntimeException(ex);
         }
@@ -164,7 +163,7 @@ public class Controller {
 
     public void moveToFrom() {
         try {
-            HttpResponse<String> responseMoveTo = Unirest.post("http://localhost:8080/api/v1/game/move?uuid=" + uuid
+            Unirest.post("http://localhost:8080/api/v1/game/move?uuid=" + uuid
                             + "&from=" + this.from + "&to=" + this.to)
                     .header("Authorization", "Bearer " + token)
                     .asString();
@@ -179,5 +178,13 @@ public class Controller {
 
     public String getTo() {
         return to;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public String getUuid() {
+        return uuid;
     }
 }
