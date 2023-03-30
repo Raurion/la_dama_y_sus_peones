@@ -16,11 +16,52 @@ public class Controller {
     private String token;
     private String uuid;
     private List<String> whites;
+    private List<String> blacks;
     private HashMap<String, Integer> positions;
     private String from;
     private String to;
+    private String color;
 
-    public Controller() {
+    public void setToken(){
+        Unirest.setTimeouts(0, 0);
+        HttpResponse<JsonNode> responseToken = null;
+        try {
+            responseToken = Unirest.post("http://localhost:8080/oauth/token?username=admin&password=admin&grant_type=password")
+                    .header("Authorization", "Basic Y2xpZW50SWQ6c2VjcmV0")
+                    .header("Content-Type", "application/x-www-form-urlencoded")
+                    .field("username", "admin")
+                    .field("password", "admin")
+                    .field("grant_type", "password").asJson();
+        this.token = responseToken.getBody().getObject().getString("access_token");
+        } catch (UnirestException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void setUuid(int raza){
+        if(raza == 1){
+            color = "WHITE";
+        }else if(raza == 0){
+            color = "BLACK";
+        }else{ throw new RuntimeException("SOLO HAY DOS RAZAS VALIDAS");}
+        Unirest.setTimeouts(0, 0);
+        HttpResponse<JsonNode> responseToken = null;
+        try {
+            HttpResponse<JsonNode> responseUuid = Unirest.post("http://localhost:8080/api/v1/game/create")
+                    .header("Authorization", "Bearer " + token)
+                    .header("Content-Type", "application/x-www-form-urlencoded")
+                    .field("side", color)
+                    .field("againstComputer", "false")
+                    .field("observers", "false")
+                    .asJson();
+
+            this.uuid = responseUuid.getBody().getObject().getString("response");
+        } catch (UnirestException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /*public Controller() {
         Unirest.setTimeouts(0, 0);
         try {
             //token
@@ -53,9 +94,9 @@ public class Controller {
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
-    }
+    }*/
 
-    public void setGamePositions() {
+    public void setBoard() {
         try {
             HttpResponse<String> responseGetGamePositions = Unirest.get("http://localhost:8080/api/v1/game/pieces?uuid=" + uuid
                     )
@@ -81,6 +122,15 @@ public class Controller {
         this.positions.forEach((pieza, raza) -> {
             if (raza == 1) {
                 whites.add(pieza);
+                System.out.println("key: " + pieza + " value:" + raza);
+            }
+        });
+    }
+
+    public void setBlacks() {
+        this.positions.forEach((pieza, raza) -> {
+            if (raza == 0) {
+                blacks.add(pieza);
                 System.out.println("key: " + pieza + " value:" + raza);
             }
         });
@@ -123,7 +173,7 @@ public class Controller {
                 }
             }
 
-            //ramdon para elegir una blanca
+            //random para elegir una blanca
             int random = (int) (Math.random() * (whites.size() - 0));
             HttpResponse<String> responseGetAvailableMoves = Unirest.get("http://localhost:8080/api/v1/game/available-moves?from=" + whites.get(random) + "&uuid=" + this.uuid)
                     .header("Authorization", "Bearer " + this.token)
