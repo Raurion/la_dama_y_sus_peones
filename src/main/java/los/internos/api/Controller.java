@@ -297,13 +297,31 @@ public class Controller {
 
     public void joinGame(){
         try {
-            HttpResponse<String> response = Unirest.post("http://localhost:8080/api/v1/game/join")
+            Unirest.post("http://localhost:8080/api/v1/game/join")
                     .header("Authorization", "Bearer "+this.token)
                     .header("Content-Type", "application/x-www-form-urlencoded")
                     .field("uuid", this.uuid)
                     .field("side", this.color)
                     .field("uiUuid", "null")
                     .asString();
+
+        } catch (UnirestException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean checkMate(){
+        //check mate
+        try {
+            HttpResponse<String> responseCheckMate = Unirest.get("http://localhost:8080/api/v1/game/check-mate?uuid=" + uuid
+                            + "&side=WHITE")
+                    .header("Authorization", "Bearer "+token)
+                    .asString();
+            if (responseCheckMate.getBody().equals("false")) {
+                return true;
+            } else {
+                return false;
+            }
         } catch (UnirestException e) {
             throw new RuntimeException(e);
         }
@@ -311,6 +329,13 @@ public class Controller {
 
     public void setBlacks(List<String> blacks) {
         this.blacks = blacks;
+    }
+
+    public void setFrom(String from){
+        this.from = from;
+    }
+    public void setTo(String to){
+        this.to = to;
     }
 
     public String getFrom() {
@@ -324,10 +349,10 @@ public class Controller {
     public String getToken() {
         return this.token;
     }
-
     public String getUuid() {
         return this.uuid;
     }
+
     public void setUuid(String uuid){
 
     }

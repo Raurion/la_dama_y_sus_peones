@@ -79,21 +79,43 @@ public class Menu {
     }
 
     public void playGame(int color) {
-        while (true) {
+        int contador = 4;
+        while (controller.checkMate()) {
+
             if (controller.checkTurn()) {
                 controller.setBoard();
-                if (color == 1) {
-                    controller.setWhites();
-                    controller.setFreeWhites();
-                    controller.setRandomFreeWhite();
-                } else {
-                    controller.setBlacks();
-                    controller.setFreeBlacks();
-                    controller.setRandomFreeBlack();
-                }
-                controller.setRandomToFromFrom();
-                controller.move();
-                System.out.println("MOVIENDO");
+                    if (color == 1) {
+                        if(contador==4) {
+                            controller.setFrom("E2");
+                            controller.setTo("E4");
+                            System.out.println("4");
+                        }else if(contador==3){
+                            controller.setFrom("D1");
+                            controller.setTo("H5");
+                            System.out.println("3");
+                        } else if (contador == 2) {
+                            controller.setFrom("F1");
+                            controller.setTo("C4");
+                            System.out.println("2");
+                        } else if(contador==1){
+                            controller.setFrom("H5");
+                            controller.setTo("F7");
+                            System.out.println("1");
+                        }else {
+                            controller.setWhites();
+                            controller.setFreeWhites();
+                            controller.setRandomFreeWhite();
+                            controller.setRandomToFromFrom();
+                        }
+                    } else {
+                        controller.setBlacks();
+                        controller.setFreeBlacks();
+                        controller.setRandomFreeBlack();
+                    }
+
+                    controller.move();
+                    System.out.println("MOVIENDO");
+                contador--;
             } else {
                 //System.out.println("ESPERANDO");
             }
