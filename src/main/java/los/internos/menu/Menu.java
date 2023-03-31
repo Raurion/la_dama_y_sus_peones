@@ -63,19 +63,14 @@ public class Menu{
                                 break;
                             }
 
-                        }
-                    case 2:
-                        System.out.println("*** ELIGE UN COLOR: BLANCO (1) || NEGRO (0) ***");
-                        color = sc.nextInt();
-                        //CASE BLACK
-                        if(color == 0){
-                            controller.setColorBlack();
+                        } else if (color == 0) {
+                            controller.setColorWhite();
                             controller.setUuid();
-                            if(checkGameCreated()){
+                            if (checkGameCreated()) {
                                 System.out.println("TYPE ANYTHING TO START");
                                 sc.next();
                                 playGame(color);
-                            }else{
+                            } else {
 
                                 break;
                             }

@@ -26,13 +26,17 @@ public class Controller {
     private List<String> blacks;
     private List<String> freeBlacks;
     private HashMap<String, Integer> board;
+    private HashMap<String, String> positionCode;
     private String from;
     private String to;
     private String color;
+    private String pieceName;
+    private int row;
     private int random;
 
     public Controller() {
         board = new HashMap<>();
+        positionCode = new HashMap<>();
         whites = new ArrayList<>();
         freeWhites = new ArrayList<>();
     }
@@ -134,6 +138,8 @@ public class Controller {
                 JSONObject jsonObject = jsonArray.getJSONObject(i);
                 String rawPosition = jsonObject.getString("rawPosition");
                 Integer sides = jsonObject.getInt("side");
+                pieceName = jsonObject.getString("name");
+                this.positionCode.put(rawPosition, pieceName);
                 this.board.put(rawPosition, sides);
             }
         } catch (Exception e) {
@@ -233,9 +239,12 @@ public class Controller {
         from = freeBlacks.get(random);
     }
 
+    public void setRandomPositionCode() {
+        pieceName = positionCode.get(from);
+    }
+
     public void setRandomToFromFrom() {
         try {
-            System.out.println(freeWhites);
             HttpResponse<String> responseGetAvailableMoves = Unirest.get("http://localhost:8080/api/v1/game/available-moves?from=" + from + "&uuid=" + this.uuid)
                     .header("Authorization", "Bearer " + this.token)
                     .asString();
@@ -244,7 +253,7 @@ public class Controller {
             String[] array = new String[jsonArray.length()];
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject jsonObject = jsonArray.getJSONObject(i);
-                int row = jsonObject.getInt("row");
+                row = jsonObject.getInt("row");
                 String col = jsonObject.getString("col");
                 array[i] = col.toUpperCase() + row;
             }
@@ -261,6 +270,31 @@ public class Controller {
         }
     }
 
+    public void whitePawnPromotion(){
+        try {
+            if(pieceName.equals("White Pawn")&&row==8) {
+                Unirest.setTimeouts(0, 0);
+                HttpResponse<String> response = Unirest.post("http://localhost:8080/api/v1/game/piece/pawn/promotion?to=" + from + "&uuid=" + uuid + "&piece=QUEEN")
+                        .header("Authorization", "Bearer " + token)
+                        .asString();
+            }
+        } catch (UnirestException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    public void blackPawnPromotion(){
+        try {
+            if(pieceName.equals("Black Pawn")&&row==1) {
+                Unirest.setTimeouts(0, 0);
+                HttpResponse<String> response = Unirest.post("http://localhost:8080/api/v1/game/piece/pawn/promotion?to=" + from + "&uuid=" + uuid + "&piece=QUEEN")
+                        .header("Authorization", "Bearer " + token)
+                        .asString();
+            }
+        } catch (UnirestException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
 
     /*public String getAvailableMoves() {
         try {
