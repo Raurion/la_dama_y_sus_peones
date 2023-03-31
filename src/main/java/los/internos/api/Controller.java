@@ -39,6 +39,20 @@ public class Controller {
         positionCode = new HashMap<>();
         whites = new ArrayList<>();
         freeWhites = new ArrayList<>();
+        blacks = new ArrayList<>();
+        freeBlacks = new ArrayList<>();
+        setUser();
+    }
+
+    public void setUser(){
+        try {
+            Unirest.put("http://localhost:8080/api/v1/user")
+                    .header("Content-Type", "application/json")
+                    .body("{\r\n  \"email\": \"pawn@pawn.com\",\r\n  \"name\": \"pawn\",\r\n  \"password\": \"pawn\"\r\n}")
+                    .asString();
+        } catch (UnirestException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void setColorBlack() {
@@ -54,11 +68,11 @@ public class Controller {
         Unirest.setTimeouts(0, 0);
         HttpResponse<JsonNode> responseToken = null;
         try {
-            responseToken = Unirest.post("http://localhost:8080/oauth/token?username=admin&password=admin&grant_type=password")
+            responseToken = Unirest.post("http://localhost:8080/oauth/token?username=pawn&password=pawn&grant_type=password")
                     .header("Authorization", "Basic Y2xpZW50SWQ6c2VjcmV0")
                     .header("Content-Type", "application/x-www-form-urlencoded")
-                    .field("username", "admin")
-                    .field("password", "admin")
+                    .field("username", "pawn")
+                    .field("password", "pawn")
                     .field("grant_type", "password").asJson();
             this.token = responseToken.getBody().getObject().getString("access_token");
         } catch (UnirestException e) {
@@ -66,9 +80,9 @@ public class Controller {
         }
     }
 
+
     public void setUuid() {
         Unirest.setTimeouts(0, 0);
-        HttpResponse<JsonNode> responseToken = null;
         try {
             HttpResponse<JsonNode> responseUuid = Unirest.post("http://localhost:8080/api/v1/game/create")
                     .header("Authorization", "Bearer " + token)
@@ -88,40 +102,6 @@ public class Controller {
         }
     }
 
-    /*public Controller() {
-        Unirest.setTimeouts(0, 0);
-        try {
-            //token
-            HttpResponse<JsonNode> responseToken = Unirest.post("http://localhost:8080/oauth/token?username=admin&password=admin&grant_type=password")
-                    .header("Authorization", "Basic Y2xpZW50SWQ6c2VjcmV0")
-                    .header("Content-Type", "application/x-www-form-urlencoded")
-                    .field("username", "admin")
-                    .field("password", "admin")
-                    .field("grant_type", "password").asJson();
-            this.token = responseToken.getBody().getObject().getString("access_token");
-
-            //uuid
-            HttpResponse<JsonNode> responseUuid = Unirest.post("http://localhost:8080/api/v1/game/create")
-                    .header("Authorization", "Bearer " + token)
-                    .header("Content-Type", "application/x-www-form-urlencoded")
-                    .field("side", "WHITE")
-                    .field("againstComputer", "false")
-                    .field("observers", "false")
-                    .asJson();
-
-            this.uuid = responseUuid.getBody().getObject().getString("response");
-            System.out.println("Match UUID:");
-            System.out.println(uuid);
-
-            positions = new HashMap<>();
-            setGamePositions();
-
-            whites = new ArrayList<>();
-
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
-    }*/
 
     public void setBoard() {
         try {
@@ -178,22 +158,6 @@ public class Controller {
     public HashMap<String, Integer> getBoard() {
         return board;
     }
-
-    /*public boolean getIfAvailableMoves(String from){
-        try {
-            HttpResponse<String> responseGetAvailableMoves = Unirest.get("http://localhost:8080/api/v1/game/available-moves?from="+ from +"&uuid="+this.uuid)
-                    .header("Authorization", "Bearer "+this.token)
-                    .asString();
-            String resultado = responseGetAvailableMoves.getBody();
-            if(resultado.equals("[]")){
-                return true;
-            }
-
-        }catch (Exception e){
-            System.out.println(e.getMessage());
-        }
-        return false;
-    }*/
 
     public void setFreeWhites() {
         try {
@@ -296,58 +260,10 @@ public class Controller {
         }
     }
 
-    /*public String getAvailableMoves() {
-        try {
-            ArrayList<String> whitesCanMove = new ArrayList<>();
-            for (int i = 0; i < whites.size(); i++) {
-                HttpResponse<String> responseGetAvailableMoves = Unirest.get("http://localhost:8080/api/v1/game/available-moves?from=" + whites.get(i) + "&uuid=" + this.uuid)
-                        .header("Authorization", "Bearer " + this.token)
-                        .asString();
-                String resultado = responseGetAvailableMoves.getBody();
-                if (!resultado.equals("[]")) {
-                    whitesCanMove.add(whites.get(i));
-                }
-            }
-
-            //random para elegir una blanca
-            int random = (int) (Math.random() * (whites.size() - 0));
-            HttpResponse<String> responseGetAvailableMoves = Unirest.get("http://localhost:8080/api/v1/game/available-moves?from=" + whites.get(random) + "&uuid=" + this.uuid)
-                    .header("Authorization", "Bearer " + this.token)
-                    .asString();
-            String resultado = responseGetAvailableMoves.getBody();
-            //aqui pongo el from que se va a usar
-            from = whites.get(random);
-
-            //aqui voy a coger las posiciones
-            String responseBody = responseGetAvailableMoves.getBody();
-            JSONArray jsonArray = new JSONArray(responseBody);
-            //random = (int)(Math.random()*(jsonArray.length()-0));
-            // System.out.println(random);
-
-            //  int i = random;
-            String[] array = new String[jsonArray.length()];
-            for (int i = 0; i < jsonArray.length(); i++) {
-                JSONObject jsonObject = jsonArray.getJSONObject(i);
-                int row = jsonObject.getInt("row");
-                String col = jsonObject.getString("col");
-                array[i] = col.toUpperCase() + row;
-            }
-
-            random = (int) (Math.random() * (array.length - 0));
-            System.out.println(random);
-
-            to = array[random];
-
-            return whitesCanMove.toString();
-        } catch (UnirestException ex) {
-            throw new RuntimeException(ex);
-        }
-    }
-*/
 
     public void move() {
         try {
-            HttpResponse<String> responseMoveTo = Unirest.post("http://localhost:8080/api/v1/game/move?uuid=" + uuid
+            Unirest.post("http://localhost:8080/api/v1/game/move?uuid=" + uuid
                             + "&from=" + this.from + "&to=" + this.to)
                     .header("Authorization", "Bearer " + token)
                     .asString();
@@ -379,6 +295,24 @@ public class Controller {
         }
     }
 
+    public void joinGame(){
+        try {
+            HttpResponse<String> response = Unirest.post("http://localhost:8080/api/v1/game/join")
+                    .header("Authorization", "Bearer "+this.token)
+                    .header("Content-Type", "application/x-www-form-urlencoded")
+                    .field("uuid", this.uuid)
+                    .field("side", this.color)
+                    .field("uiUuid", "null")
+                    .asString();
+        } catch (UnirestException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void setBlacks(List<String> blacks) {
+        this.blacks = blacks;
+    }
+
     public String getFrom() {
         return from;
     }
@@ -393,5 +327,8 @@ public class Controller {
 
     public String getUuid() {
         return this.uuid;
+    }
+    public void setUuid(String uuid){
+
     }
 }

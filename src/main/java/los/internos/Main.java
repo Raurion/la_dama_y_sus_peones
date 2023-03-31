@@ -10,5 +10,6 @@ public class Main {
         Controller controller = new Controller();
         Menu menu = new Menu(controller);
         menu.showMenu();
+        
     }
 }

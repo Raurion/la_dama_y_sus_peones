@@ -5,14 +5,14 @@ import los.internos.api.Controller;
 import java.sql.SQLOutput;
 import java.util.Scanner;
 
-public class Menu{
+public class Menu {
     private Controller controller;
 
     public Menu(Controller controller) {
         this.controller = controller;
     }
 
-    public void banner(){
+    public void banner() {
         System.out.println(" __                       _______                                                                                               _______");
         System.out.println("| $$       ______        | $$$$$$$\\  ______   ______ ____    ______         __    __         _______  __    __   _______       | $$$$$$$\\  ______    ______   _______    ______    _______");
         System.out.println("| $$      |      \\       | $$  | $$ |      \\ |      \\    \\  |      \\       |  \\  |  \\       /       \\|  \\  |  \\ /       \\      | $$__/ $$ /      \\  /      \\ |       \\  /      \\  /       \\");
@@ -26,17 +26,18 @@ public class Menu{
         System.out.println("                                                                            \\$$$$$$");
     }
 
-    public void showMenu(){
+    public void showMenu() {
         Scanner sc = new Scanner(System.in);
         int opcion;
-        int color;
+        int color = -1;
+        String uuid;
 
         controller.setToken();
         banner();
-        do{
-            if(controller.getToken() == null) {
+        do {
+            if (controller.getToken() == null) {
                 System.out.println("**** TOKEN IS NULL ****");
-            }else{
+            } else {
                 System.out.println("***** TOKEN GENERADO: *****");
                 System.out.println(controller.getToken());
                 System.out.println("***************************************");
@@ -46,62 +47,40 @@ public class Menu{
                 System.out.println("***************************************");
                 System.out.println();
                 opcion = sc.nextInt();
-                switch (opcion){
+                switch (opcion) {
                     case 1:
-                        System.out.println("*** ELIGE UN COLOR: BLANCO (1) || NEGRO (0) ***");
-                        color = sc.nextInt();
-                        //CASE WHITE
-                        if(color == 1){
-                            controller.setColorWhite();
-                            controller.setUuid();
-                            if(checkGameCreated()){
-                                System.out.println("TYPE ANYTHING TO START");
-                                sc.next();
-                                playGame(color);
-                            }else{
-
-                                break;
-                            }
-
-                        } else if (color == 0) {
-                            controller.setColorWhite();
-                            controller.setUuid();
-                            if (checkGameCreated()) {
-                                System.out.println("TYPE ANYTHING TO START");
-                                sc.next();
-                                playGame(color);
-                            } else {
-
-                                break;
-                            }
-
-                        }
+                        gameConfig(sc, color);
+                        break;
+                    case 2:
+                        System.out.println("** Introduce the uuid: **");
+                        controller.setUuid(sc.next());
+                        controller.joinGame();
+                        System.out.println("JOINED SUCCESSFULLY");
+                        gameConfig(sc, color);
                         break;
                 }
-
-
             }
             for (int i = 0; i < 10; i++) {
                 System.out.println();
 
             }
-        }while(true);
+        } while (true);
     }
 
-    public boolean checkGameCreated(){
-        if(controller.getUuid() != null) {
+    public boolean checkGameCreated() {
+        if (controller.getUuid() != null) {
             System.out.println("***** GAME CREATED *****");
             System.out.println(controller.getUuid());
             return true;
-        }else{
+        } else {
             System.err.println("COULD NOT CREATE GAME");
             return false;
         }
     }
 
-    public void playGame(int color){
+    public void playGame(int color) {
         while (true) {
-            while (controller.checkTurn()) {
+            if (controller.checkTurn()) {
                 controller.setBoard();
                 if (color == 1) {
                     controller.setWhites();
@@ -114,11 +93,40 @@ public class Menu{
                 }
                 controller.setRandomToFromFrom();
                 controller.move();
+                System.out.println("MOVIENDO");
+            } else {
+                //System.out.println("ESPERANDO");
             }
-            try{
+            try {
                 Thread.sleep(500);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
+            }
+        }
+
+
+    }
+
+    public void gameConfig(Scanner sc, int color) {
+        System.out.println("*** ELIGE UN COLOR: BLANCO (1) || NEGRO (0) ***");
+        color = sc.nextInt();
+        //CASE WHITE
+        if (color == 1) {
+            controller.setColorWhite();
+            controller.setUuid();
+            if (checkGameCreated()) {
+                System.out.println("TYPE ANYTHING TO START");
+                sc.next();
+                playGame(color);
+            }
+
+        } else if (color == 0) {
+            controller.setColorBlack();
+            controller.setUuid();
+            if (checkGameCreated()) {
+                System.out.println("TYPE ANYTHING TO START");
+                sc.next();
+                playGame(color);
             }
         }
     }
